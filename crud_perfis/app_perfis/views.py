@@ -14,6 +14,7 @@ from django.contrib.auth import logout
 from django.http import HttpResponseForbidden
 from django.http import JsonResponse
 import json
+from .models import Perfil, Departamento
 
 class CustomTokenObtainPairView(APIView):
     permission_classes = [AllowAny]
@@ -89,6 +90,7 @@ def login_view(request):
         if user:
             refresh = RefreshToken.for_user(user)
             access_token = refresh.access_token
+            request.session['access_token'] = str(access_token)
             return JsonResponse({
                 'access_token': str(access_token),
                 'refresh_token': str(refresh)
@@ -112,14 +114,43 @@ class LogoutView(APIView):
         # Resposta de sucesso após logout
         return Response({"message": "Logout realizado com sucesso!"}, status=status.HTTP_200_OK)
 
+# View para listar os perfis
 def perfil_view(request):
     if request.method == 'GET':
-        return render(request, 'perfil.html')
+        perfis = Perfil.objects.all()  # Obter todos os perfis
+        return render(request, 'perfil.html', {'perfis': perfis})
 
-def cargos_view(request):
+# View para listar os departamentos
+def departamento_view(request):
     if request.method == 'GET':
-        return render(request, 'cargos.html')
-    
+        departamentos = Departamento.objects.all()  # Obter todos os departamentos
+        return render(request, 'departamento.html', {'departamentos': departamentos})
+
+# Função para verificar o perfil de um usuário
+def check_user_permission(user):
+    # Obtém os perfis associados ao usuário
+    perfis = Perfil.objects.filter(user=user)
+    return [perfil.nome for perfil in perfis]
+
 def funcionarios_view(request):
     if request.method == 'GET':
-        return render(request, 'funcionarios.html')
+        token = request.session.get('access_token')
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        user_id = payload['user_id']
+        user = User.objects.get(id=user_id)
+        perfil = user.perfil  # Agora acessando diretamente o perfil do usuário
+        departamento_usuario = user.departamento  # Agora acessando diretamente o departamento do usuário
+        if perfil is None:
+            return JsonResponse({'message': 'Usuário sem perfil atribuído'}, status=400)
+
+        if perfil.nome == "super":
+            # Usuário com perfil "super" pode ver todos os usuários
+            funcionarios = User.objects.all()  # Pegando todos os usuários
+        elif perfil.nome == "gestor":
+            # Usuário com perfil "gestor" pode ver apenas funcionários do mesmo departamento
+            funcionarios = User.objects.filter(departamento=departamento_usuario)
+        elif perfil.nome == "funcionario":
+            # Usuário com perfil "funcionario" não pode ver a tela de funcionários
+            return render(request, 'error.html', {'message': 'Você não tem permissão para ver essa tela.'})
+        print('funcionarios',funcionarios)
+        return render(request, 'funcionarios.html', {'funcionarios': funcionarios}) 

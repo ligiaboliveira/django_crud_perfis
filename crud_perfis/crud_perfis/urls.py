@@ -10,6 +10,6 @@ urlpatterns = [
     path('api/logout/', LogoutView.as_view(), name='logout'),  # Rota para logout
     path('api/validate_token', validate_token, name='validate_token'),  # Endpoint para validar o token
     path('perfil/', perfil_view, name='perfil'),
-    path('cargos/', cargos_view, name='cargos'),
+    path('departamento/', departamento_view, name='departamento'),
     path('funcionarios/', funcionarios_view, name='funcionarios'),
 ]

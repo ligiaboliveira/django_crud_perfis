@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>cargos</title>
+    <title>departamento</title>
     <!-- Incluindo o Bootstrap (pode ser feito através de CDN ou arquivo local) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -14,9 +14,29 @@
     {% include 'navbar.html' %}
     
     <div class="container mt-5">
-        <h1>Bem-vindo à cargos!</h1>
-        <p>Você está autenticado com o token JWT!</p>
+        <h1>Lista de Departamentos</h1>
+
+        <!-- Exibindo os departamentos -->
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Descrição</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for departamento in departamentos %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ departamento.nome }}</td>
+                    <td>{{ departamento.descricao }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
