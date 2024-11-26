@@ -138,36 +138,40 @@
     }
   }
 
-  document.addEventListener("DOMContentLoaded", function() {
-    // Recupera o perfil do usuário armazenado no localStorage
-    const perfil = localStorage.getItem("user_profile");
+  document.addEventListener("DOMContentLoaded", function () {
+    // Define um timeout para esperar o carregamento completo dos elementos
+    setTimeout(() => {
+      // Recupera o perfil do usuário armazenado no localStorage
+      const perfil = localStorage.getItem("user_profile");
   
-    // Verifica se o perfil é diferente de "super" e oculta os links de "Perfil" e "Departamento"
-    console.log("🚀 ~ document.addEventListener ~ perfil:", perfil)
-    console.log("🚀 ~ document.addEventListener ~ perfil:", perfil == "gestor")
-
-    if (perfil && perfil == "gestor") {
-      // Seleciona os links para "Perfil" e "Departamento"
-      const perfilLink = document.querySelector('a[href="/perfil/"]').parentElement;
-      const departamentoLink = document.querySelector('a[href="/departamento/"]').parentElement;
+      // Verifica o perfil e oculta os links de acordo
+      console.log("🚀 ~ document.addEventListener ~ perfil:", perfil);
+      console.log("🚀 ~ document.addEventListener ~ perfil:", perfil == "gestor");
   
-      // Oculta os links
-      if (perfilLink) perfilLink.style.display = "none";
-      if (departamentoLink) departamentoLink.style.display = "none";
-    }else if (perfil && perfil == "funcionario") {
-      // Seleciona os links para "Perfil" e "Departamento"
-      const perfilLink = document.querySelector('a[href="/perfil/"]').parentElement;
-      const departamentoLink = document.querySelector('a[href="/departamento/"]').parentElement;
-      const funcionarioLink = document.querySelector('a[href="/funcionarios/"]').parentElement;
-      const criarUsuarioLink = document.querySelector('a[href="/criar_usuario/"]').parentElement;
+      if (perfil && perfil == "gestor") {
+        // Seleciona os links para "Perfil" e "Departamento"
+        const perfilLink = document.querySelector('a[href="/perfil/"]')?.parentElement;
+        const departamentoLink = document.querySelector('a[href="/departamento/"]')?.parentElement;
   
-      // Oculta os links
-      if (perfilLink) perfilLink.style.display = "none";
-      if (departamentoLink) departamentoLink.style.display = "none";
-      if (funcionarioLink) funcionarioLink.style.display = "none";
-      if (criarUsuarioLink) criarUsuarioLink.style.display = "none";
-    }
+        // Oculta os links
+        if (perfilLink) perfilLink.style.display = "none";
+        if (departamentoLink) departamentoLink.style.display = "none";
+      } else if (perfil && perfil == "funcionario") {
+        // Seleciona os links para "Perfil", "Departamento", "Funcionários" e "Criar Usuário"
+        const perfilLink = document.querySelector('a[href="/perfil/"]')?.parentElement;
+        const departamentoLink = document.querySelector('a[href="/departamento/"]')?.parentElement;
+        const funcionarioLink = document.querySelector('a[href="/funcionarios/"]')?.parentElement;
+        const criarUsuarioLink = document.querySelector('a[href="/criar_usuario/"]')?.parentElement;
+  
+        // Oculta os links
+        if (perfilLink) perfilLink.style.display = "none";
+        if (departamentoLink) departamentoLink.style.display = "none";
+        if (funcionarioLink) funcionarioLink.style.display = "none";
+        if (criarUsuarioLink) criarUsuarioLink.style.display = "none";
+      }
+    }, 500); // Ajuste o tempo (em ms) conforme necessário
   });
+  
   
   
 </script>
