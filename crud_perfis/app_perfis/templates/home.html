@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+</head>
+<body>
+    <h1>Bem-vindo à Home!</h1>
+    
+    <p>Você está autenticado com o token JWT!</p>
+
+    <button id="logoutBtn">Sair</button> <!-- Botão de logout -->
+
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        function logout() {
+            const refreshToken = localStorage.getItem('refresh_token');  // Recupera o refresh token do localStorage
+            
+            if (refreshToken) {
+                // Enviar requisição POST para o backend para realizar o logout
+                fetch('/api/logout/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`  // Envia o access token no cabeçalho
+                    },
+                    body: JSON.stringify({ refresh: refreshToken })  // Envia o refresh token no corpo da requisição
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === 'Logout realizado com sucesso!') {
+                        // Remover o token JWT e refresh token do localStorage
+                        localStorage.removeItem('access_token');
+                        localStorage.removeItem('refresh_token');
+                        // Redirecionar para o login
+                        window.location.href = "/login/";
+                    } else {
+                        alert('Erro ao realizar logout: ' + data.detail);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro na requisição de logout:', error);
+                    alert('Erro ao tentar fazer logout. Tente novamente.');
+                });
+            } else {
+                alert("Refresh token não encontrado.");
+            }
+        }
+        // Acessando o token JWT do localStorage
+        const accessToken = localStorage.getItem('access_token');
+        
+        if (!accessToken) {
+            alert("Token não encontrado. Redirecionando para login.");
+            window.location.href = "/login/";  // Redireciona para a tela de login
+        } else {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            // Validar o token com o backend
+            fetch('/api/validate_token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "X-CSRFToken": csrfToken,  // Incluindo o token CSRF no cabeçalho
+                },
+                body: JSON.stringify({ access_token: accessToken })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Token inválido ou expirado') {
+                    // Token inválido, removendo o token do localStorage e redirecionando para login
+                    localStorage.removeItem('access_token');
+                    alert("Token inválido ou expirado. Redirecionando para login.");
+                    window.location.href = "/login/";  // Redireciona para a tela de login
+                } else {
+                    // Token válido, continue na home
+                    console.log("Token válido", data);
+                }
+            })
+            .catch(error => {
+                console.error('Erro na validação do token:', error);
+                alert("Erro ao verificar token. Redirecionando para login.");
+                localStorage.removeItem('access_token');
+                window.location.href = "/login/";
+            });
+        }
+    </script>
+</body>
+</html>
