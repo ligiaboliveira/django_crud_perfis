@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,9 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'djangorestframework ',
-    'djangorestframework-jwt ',
-    'django-cors-headers',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'corsheaders',
     'app_perfis',
 ]
 
@@ -52,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'crud_perfis.urls'
@@ -126,3 +128,28 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+# Defina o tempo de expiração do token
+# Definindo o JWT no Django
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  # Tempo de vida do token de acesso
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # Tempo de vida do token de refresh
+    'ROTATE_REFRESH_TOKENS': False,  # Se vai rotacionar os tokens de refresh
+    'BLACKLIST_AFTER_ROTATION': True,  # Se vai colocar o token de refresh na blacklist após ser rotacionado
+    'ALGORITHM': 'HS256',  # Algoritmo usado para criptografar o token
+    'SIGNING_KEY': SECRET_KEY,  # Chave de assinatura (usa o mesmo SECRET_KEY do Django)
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',  # Usado para identificar o usuário
+    'USER_ID_CLAIM': 'user_id',  # O campo que será inserido no token
+}
