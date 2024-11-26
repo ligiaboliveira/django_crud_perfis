@@ -13,6 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import logout
 from django.http import HttpResponseForbidden
 from django.http import JsonResponse
+import json
 
 class CustomTokenObtainPairView(APIView):
     permission_classes = [AllowAny]
@@ -61,9 +62,10 @@ def is_valid_jwt(token):
     return payload
 
 def validate_token(request):
-    token = request.data.get('access_token')
-    print('token')
-    print(token)
+    body = json.loads(request.body)
+    token = body.get('access_token')
+    print('token:', token)
+
     if token:
         payload = is_valid_jwt(token)
         if payload is None:
@@ -109,3 +111,15 @@ class LogoutView(APIView):
 
         # Resposta de sucesso após logout
         return Response({"message": "Logout realizado com sucesso!"}, status=status.HTTP_200_OK)
+
+def perfil_view(request):
+    if request.method == 'GET':
+        return render(request, 'perfil.html')
+
+def cargos_view(request):
+    if request.method == 'GET':
+        return render(request, 'cargos.html')
+    
+def funcionarios_view(request):
+    if request.method == 'GET':
+        return render(request, 'funcionarios.html')
