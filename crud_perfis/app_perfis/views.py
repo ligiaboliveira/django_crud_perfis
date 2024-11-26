@@ -154,3 +154,39 @@ def funcionarios_view(request):
             return render(request, 'error.html', {'message': 'Você não tem permissão para ver essa tela.'})
         print('funcionarios',funcionarios)
         return render(request, 'funcionarios.html', {'funcionarios': funcionarios}) 
+    
+def criar_usuario(request):
+    if request.method == 'GET':
+        # Recupera todos os perfis e departamentos para exibir no formulário
+        perfis = Perfil.objects.all()
+        departamentos = Departamento.objects.all()
+        
+        # Retorna os dados em um formato adequado para o frontend
+        return render(request, 'criar_usuario.html', {'perfis': perfis, 'departamentos': departamentos,})
+
+    elif request.method == 'POST':
+        # Processa os dados enviados via POST
+        data = json.loads(request.body)
+        
+        try:
+            perfil = Perfil.objects.get(id=data['perfil'])
+            departamento = Departamento.objects.get(id=data['departamento'])
+            
+            # Criando o usuário
+            user = User.objects.create_user(
+                username=data['email'],  # Usando o email como nome de usuário
+                email=data['email'],
+                first_name=data['first_name'],
+                last_name=data['last_name'],
+                password=data['senha']
+            )
+            user.perfil = perfil
+            user.departamento = departamento
+            user.save()
+            
+            return JsonResponse({'message': 'Usuário criado com sucesso!'}, status=201)
+        
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'message': 'Método não permitido'}, status=405)
