@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.serializers import Serializer, CharField
 from django.contrib.auth import authenticate
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import logout
 from django.http import HttpResponseForbidden
@@ -42,7 +42,7 @@ class UserRegistrationView(APIView):
             username = serializer.validated_data['username']
             password = serializer.validated_data['password']
 
-            # Criação do usuário
+            
             user = User.objects.create_user(username=username, password=password)
             return Response({"message": "Usuário criado com sucesso!"}, status=status.HTTP_201_CREATED)
 
@@ -80,7 +80,7 @@ def home_view(request, access_token=None):
     
 def login_view(request):
     if request.method == 'GET':
-        # Renderiza a página de login
+        
         return render(request, 'login.html')
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -108,27 +108,27 @@ class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        # Invalidar a sessão no Django (remove o usuário da sessão)
+        
         logout(request)
 
-        # Resposta de sucesso após logout
+        
         return Response({"message": "Logout realizado com sucesso!"}, status=status.HTTP_200_OK)
 
-# View para listar os perfis
+
 def perfil_view(request):
     if request.method == 'GET':
-        perfis = Perfil.objects.all()  # Obter todos os perfis
+        perfis = Perfil.objects.all()  
         return render(request, 'perfil.html', {'perfis': perfis})
 
-# View para listar os departamentos
+
 def departamento_view(request):
     if request.method == 'GET':
-        departamentos = Departamento.objects.all()  # Obter todos os departamentos
+        departamentos = Departamento.objects.all()  
         return render(request, 'departamento.html', {'departamentos': departamentos})
 
-# Função para verificar o perfil de um usuário
+
 def check_user_permission(user):
-    # Obtém os perfis associados ao usuário
+    
     perfis = Perfil.objects.filter(user=user)
     return [perfil.nome for perfil in perfis]
 
@@ -138,43 +138,43 @@ def funcionarios_view(request):
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
         user_id = payload['user_id']
         user = User.objects.get(id=user_id)
-        perfil = user.perfil  # Agora acessando diretamente o perfil do usuário
-        departamento_usuario = user.departamento  # Agora acessando diretamente o departamento do usuário
+        perfil = user.perfil  
+        departamento_usuario = user.departamento  
         if perfil is None:
             return JsonResponse({'message': 'Usuário sem perfil atribuído'}, status=400)
 
         if perfil.nome == "super":
-            # Usuário com perfil "super" pode ver todos os usuários
-            funcionarios = User.objects.all()  # Pegando todos os usuários
+            
+            funcionarios = User.objects.all()  
         elif perfil.nome == "gestor":
-            # Usuário com perfil "gestor" pode ver apenas funcionários do mesmo departamento
+            
             funcionarios = User.objects.filter(departamento=departamento_usuario)
         elif perfil.nome == "funcionario":
-            # Usuário com perfil "funcionario" não pode ver a tela de funcionários
+            
             return render(request, 'error.html', {'message': 'Você não tem permissão para ver essa tela.'})
         print('funcionarios',funcionarios)
         return render(request, 'funcionarios.html', {'funcionarios': funcionarios}) 
     
 def criar_usuario(request):
     if request.method == 'GET':
-        # Recupera todos os perfis e departamentos para exibir no formulário
+        
         perfis = Perfil.objects.all()
         departamentos = Departamento.objects.all()
         
-        # Retorna os dados em um formato adequado para o frontend
+        
         return render(request, 'criar_usuario.html', {'perfis': perfis, 'departamentos': departamentos,})
 
     elif request.method == 'POST':
-        # Processa os dados enviados via POST
+        
         data = json.loads(request.body)
         
         try:
             perfil = Perfil.objects.get(id=data['perfil'])
             departamento = Departamento.objects.get(id=data['departamento'])
             
-            # Criando o usuário
+            
             user = User.objects.create_user(
-                username=data['email'],  # Usando o email como nome de usuário
+                username=data['email'],  
                 email=data['email'],
                 first_name=data['first_name'],
                 last_name=data['last_name'],
@@ -190,3 +190,53 @@ def criar_usuario(request):
             return JsonResponse({'error': str(e)}, status=400)
 
     return JsonResponse({'message': 'Método não permitido'}, status=405)
+
+def editar_usuario(request, user_id):
+    # Buscar o usuário pelo ID
+    user = get_object_or_404(User, id=user_id)
+    perfis = Perfil.objects.all()
+    departamentos = Departamento.objects.all()
+
+    if request.method == 'GET':
+        # Preencher os campos do formulário com os dados do usuário
+        return render(request, 'editar_usuario.html', {
+            'user': user,
+            'perfis': perfis,
+            'departamentos': departamentos
+        })
+
+    elif request.method == 'POST':
+        # Atualizar os dados do usuário
+        data = json.loads(request.body)
+        
+        try:
+            perfil = Perfil.objects.get(id=data['perfil'])
+            departamento = Departamento.objects.get(id=data['departamento'])
+            
+            # Atualizar o usuário
+            user.first_name = data['first_name']
+            user.last_name = data['last_name']
+            user.email = data['email']
+            user.perfil = perfil
+            user.departamento = departamento
+            
+            # Atualizar a senha apenas se for fornecida
+            if data.get('senha'):
+                user.set_password(data['senha'])
+            
+            user.save()
+
+            return JsonResponse({'message': 'Usuário atualizado com sucesso!'}, status=200)
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'message': 'Método não permitido'}, status=405)
+
+def deletar_usuario(request, id):
+    try:
+        usuario = get_object_or_404(User, id=id)
+        usuario.delete()  # Deleta o usuário
+        return redirect('funcionarios')  # Redireciona para a página inicial ou onde preferir
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Usuário não encontrado'}, status=404)

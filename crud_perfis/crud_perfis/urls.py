@@ -13,4 +13,6 @@ urlpatterns = [
     path('departamento/', departamento_view, name='departamento'),
     path('funcionarios/', funcionarios_view, name='funcionarios'),
     path('criar_usuario/', criar_usuario, name='criar_usuario'),
+    path('editar_usuario/<int:user_id>/', editar_usuario, name='editar_usuario'),
+    path('deletar_usuario/<int:id>/', deletar_usuario, name='deletar_usuario'),
 ]
