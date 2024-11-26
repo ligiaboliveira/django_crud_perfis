@@ -143,7 +143,7 @@ REST_FRAMEWORK = {
 # Defina o tempo de expiração do token
 # Definindo o JWT no Django
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  # Tempo de vida do token de acesso
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=25),  # Tempo de vida do token de acesso
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # Tempo de vida do token de refresh
     'ROTATE_REFRESH_TOKENS': False,  # Se vai rotacionar os tokens de refresh
     'BLACKLIST_AFTER_ROTATION': True,  # Se vai colocar o token de refresh na blacklist após ser rotacionado

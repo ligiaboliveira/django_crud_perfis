@@ -15,6 +15,7 @@ from django.http import HttpResponseForbidden
 from django.http import JsonResponse
 import json
 from .models import Perfil, Departamento
+from django.db.models import Q
 
 class CustomTokenObtainPairView(APIView):
     permission_classes = [AllowAny]
@@ -150,8 +151,17 @@ def funcionarios_view(request):
             
             funcionarios = User.objects.filter(departamento=departamento_usuario).exclude(perfil=1)
         elif perfil.nome == "funcionario":
-            
             return render(request, 'error.html', {'message': 'Você não tem permissão para ver essa tela.'})
+        
+        search_query = request.GET.get('search', '')
+        if search_query:
+            funcionarios = funcionarios.filter(
+                Q(first_name__icontains=search_query) |
+                Q(last_name__icontains=search_query) |
+                Q(email__icontains=search_query)
+            )
+
+
         print('funcionarios',funcionarios)
         return render(request, 'funcionarios.html', {'funcionarios': funcionarios}) 
     
