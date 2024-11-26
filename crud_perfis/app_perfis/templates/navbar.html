@@ -20,7 +20,7 @@
       <ul class="navbar-nav ms-auto">
         <!-- Link para o perfil -->
         <li class="nav-item">
-          <a class="nav-link" href="/perfil/">Perfil</a>
+          <a class="nav-link" href="/perfil/" >Perfil</a>
         </li>
         <!-- Link para funcionários -->
         <li class="nav-item">
@@ -28,10 +28,10 @@
         </li>
         <!-- Link para departamento -->
         <li class="nav-item">
-          <a class="nav-link" href="/departamento/">departamento</a>
+          <a class="nav-link" href="/departamento/" >departamento</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/criar_usuario/">Criar Usuário</a>
+          <a class="nav-link" href="/criar_usuario/" >Criar Usuário</a>
           <!-- Link para a página de criar usuário -->
         </li>
         <!-- Exibir nome do usuário ou botão de logout -->
@@ -70,8 +70,29 @@
           alert("Token inválido ou expirado. Redirecionando para login.");
           window.location.href = "/login/"; // Redireciona para a tela de login
         } else {
-          // Token válido, continue na home
-          console.log("Token válido", data);
+          fetch("/api/get_perfil/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": "{{ csrf_token }}", // Incluindo o token CSRF
+            },
+            body: JSON.stringify({ access_token: accessToken }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.message === "Token válido") {
+                // Armazenar o perfil do usuário no localStorage
+                console.log("🚀 ~ .then ~ data.perfil:", data.perfil)
+                localStorage.setItem(
+                  "user_profile",
+                  data.perfil
+                );
+              }
+            })
+            .catch((error) => {
+              console.error("Erro ao obter o perfil do usuário:", error);
+              alert("Erro ao obter o perfil. Tente novamente.");
+            });
         }
       })
       .catch((error) => {
@@ -116,4 +137,37 @@
       alert("Refresh token não encontrado.");
     }
   }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    // Recupera o perfil do usuário armazenado no localStorage
+    const perfil = localStorage.getItem("user_profile");
+  
+    // Verifica se o perfil é diferente de "super" e oculta os links de "Perfil" e "Departamento"
+    console.log("🚀 ~ document.addEventListener ~ perfil:", perfil)
+    console.log("🚀 ~ document.addEventListener ~ perfil:", perfil == "gestor")
+
+    if (perfil && perfil == "gestor") {
+      // Seleciona os links para "Perfil" e "Departamento"
+      const perfilLink = document.querySelector('a[href="/perfil/"]').parentElement;
+      const departamentoLink = document.querySelector('a[href="/departamento/"]').parentElement;
+  
+      // Oculta os links
+      if (perfilLink) perfilLink.style.display = "none";
+      if (departamentoLink) departamentoLink.style.display = "none";
+    }else if (perfil && perfil == "funcionario") {
+      // Seleciona os links para "Perfil" e "Departamento"
+      const perfilLink = document.querySelector('a[href="/perfil/"]').parentElement;
+      const departamentoLink = document.querySelector('a[href="/departamento/"]').parentElement;
+      const funcionarioLink = document.querySelector('a[href="/funcionarios/"]').parentElement;
+      const criarUsuarioLink = document.querySelector('a[href="/criar_usuario/"]').parentElement;
+  
+      // Oculta os links
+      if (perfilLink) perfilLink.style.display = "none";
+      if (departamentoLink) departamentoLink.style.display = "none";
+      if (funcionarioLink) funcionarioLink.style.display = "none";
+      if (criarUsuarioLink) criarUsuarioLink.style.display = "none";
+    }
+  });
+  
+  
 </script>

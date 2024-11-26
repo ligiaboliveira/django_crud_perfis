@@ -148,7 +148,7 @@ def funcionarios_view(request):
             funcionarios = User.objects.all()  
         elif perfil.nome == "gestor":
             
-            funcionarios = User.objects.filter(departamento=departamento_usuario)
+            funcionarios = User.objects.filter(departamento=departamento_usuario).exclude(perfil=1)
         elif perfil.nome == "funcionario":
             
             return render(request, 'error.html', {'message': 'Você não tem permissão para ver essa tela.'})
@@ -167,38 +167,49 @@ def criar_usuario(request):
     elif request.method == 'POST':
         
         data = json.loads(request.body)
-        
-        try:
+       
+    
+        if data.get('perfil'):
             perfil = Perfil.objects.get(id=data['perfil'])
-            departamento = Departamento.objects.get(id=data['departamento'])
+        else:
             
-            
-            user = User.objects.create_user(
-                username=data['email'],  
-                email=data['email'],
-                first_name=data['first_name'],
-                last_name=data['last_name'],
-                password=data['senha']
-            )
-            user.perfil = perfil
-            user.departamento = departamento
-            user.save()
-            
-            return JsonResponse({'message': 'Usuário criado com sucesso!'}, status=201)
+            perfil = Perfil.objects.get(nome='funcionario')  
         
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+        if data.get('departamento'): 
+            departamento = Departamento.objects.get(id=data['departamento'])
+        else:
+            token = request.session.get('access_token')
+            payload = jwt.decode(str(token), settings.SECRET_KEY, algorithms=["HS256"])
+            print('payload', payload)
+            user_id = payload['user_id']
+            user = User.objects.get(id=user_id)
+            departamento = user.departamento
+        
+        
+        user = User.objects.create_user(
+            username=data['email'],  
+            email=data['email'],
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            password=data['senha']
+        )
+        user.perfil = perfil
+        user.departamento = departamento
+        user.save()
+        
+        return JsonResponse({'message': 'Usuário criado com sucesso!'}, status=201)
+        
 
     return JsonResponse({'message': 'Método não permitido'}, status=405)
 
 def editar_usuario(request, user_id):
-    # Buscar o usuário pelo ID
+    
     user = get_object_or_404(User, id=user_id)
     perfis = Perfil.objects.all()
     departamentos = Departamento.objects.all()
 
     if request.method == 'GET':
-        # Preencher os campos do formulário com os dados do usuário
+        
         return render(request, 'editar_usuario.html', {
             'user': user,
             'perfis': perfis,
@@ -206,21 +217,34 @@ def editar_usuario(request, user_id):
         })
 
     elif request.method == 'POST':
-        # Atualizar os dados do usuário
+        
         data = json.loads(request.body)
         
         try:
-            perfil = Perfil.objects.get(id=data['perfil'])
-            departamento = Departamento.objects.get(id=data['departamento'])
+            if data.get('perfil'):
+                perfil = Perfil.objects.get(id=data['perfil'])
+            else:
+                
+                perfil = Perfil.objects.get(nome='funcionario')  
             
-            # Atualizar o usuário
+            if data.get('departamento'): 
+                departamento = Departamento.objects.get(id=data['departamento'])
+            else:
+                token = request.session.get('access_token')
+                payload = jwt.decode(str(token), settings.SECRET_KEY, algorithms=["HS256"])
+                print('payload', payload)
+                user_id = payload['user_id']
+                user = User.objects.get(id=user_id)
+                departamento = user.departamento
+            
+            
             user.first_name = data['first_name']
             user.last_name = data['last_name']
             user.email = data['email']
             user.perfil = perfil
             user.departamento = departamento
             
-            # Atualizar a senha apenas se for fornecida
+            
             if data.get('senha'):
                 user.set_password(data['senha'])
             
@@ -236,7 +260,35 @@ def editar_usuario(request, user_id):
 def deletar_usuario(request, id):
     try:
         usuario = get_object_or_404(User, id=id)
-        usuario.delete()  # Deleta o usuário
-        return redirect('funcionarios')  # Redireciona para a página inicial ou onde preferir
+        usuario.delete()  
+        return redirect('funcionarios')  
     except User.DoesNotExist:
         return JsonResponse({'error': 'Usuário não encontrado'}, status=404)
+
+def get_perfil(request):
+    if request.method == 'POST':
+        token = request.session.get('access_token')
+        
+        if not token:
+            return JsonResponse({'message': 'Token não encontrado'}, status=400)
+        
+        try:
+            
+            payload = jwt.decode(str(token), settings.SECRET_KEY, algorithms=["HS256"])
+            print('payload', payload)
+            user_id = payload['user_id']
+            
+            
+            user = User.objects.get(id=user_id)
+            
+            
+            return JsonResponse({
+                'message': 'Token válido',
+                'perfil': user.perfil.nome  
+            })
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({'message': 'Token expirado'}, status=401)
+        except jwt.InvalidTokenError:
+            return JsonResponse({'message': 'Token inválido'}, status=401)
+        except User.DoesNotExist:
+            return JsonResponse({'message': 'Usuário não encontrado'}, status=404)

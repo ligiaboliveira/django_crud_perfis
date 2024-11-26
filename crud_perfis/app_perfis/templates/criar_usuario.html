@@ -95,7 +95,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       // Função para carregar perfis e departamentos
-      
 
       // Chama a função para carregar perfis e departamentos ao carregar a página
 
@@ -139,6 +138,27 @@
               console.error("Erro ao enviar os dados:", error);
             });
         });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Recupera o perfil do usuário armazenado no localStorage
+        const perfil = localStorage.getItem("user_profile");
+
+        // Verifica se o perfil é diferente de "super" e oculta os links de "Perfil" e "Departamento"
+        console.log("🚀 ~ document.addEventListener ~ perfil:", perfil);
+        console.log(
+          "🚀 ~ document.addEventListener ~ perfil:",
+          perfil == "gestor"
+        );
+
+        if (perfil && perfil !== "super") {
+          const departamentoSelect = document.querySelector('select[id="departamento"]');
+        const perfilSelect = document.querySelector('select[id="perfil"]');
+
+
+          if (departamentoSelect) departamentoSelect.disabled = true;
+          if (perfilSelect) perfilSelect.disabled = true;
+        }
+      });
     </script>
   </body>
 </html>
