@@ -91,7 +91,7 @@
         document.getElementById("editUserForm").addEventListener("submit", function (event) {
             event.preventDefault();
 
-            const userId = {{ user.id }};  // Pegando o ID do usuário
+            const userId = {{ user.id }};  
             const formData = {
                 first_name: document.getElementById("first_name").value,
                 last_name: document.getElementById("last_name").value,
@@ -126,10 +126,10 @@
         });
 
         document.addEventListener("DOMContentLoaded", function () {
-            // Recupera o perfil do usuário armazenado no localStorage
+            
             const perfil = localStorage.getItem("user_profile");
     
-            // Verifica se o perfil é diferente de "super" e oculta os links de "Perfil" e "Departamento"
+            
             console.log("🚀 ~ document.addEventListener ~ perfil:", perfil);
             console.log(
               "🚀 ~ document.addEventListener ~ perfil:",

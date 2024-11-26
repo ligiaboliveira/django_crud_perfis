@@ -51,37 +51,37 @@
 
   if (!accessToken) {
     alert("Token não encontrado. Redirecionando para login.");
-    window.location.href = "/login/"; // Redireciona para a tela de login
+    window.location.href = "/login/"; 
   } else {
-    // Validar o token com o backend
+    
     fetch("/api/validate_token", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRFToken": "{{ csrf_token }}", // Incluindo o token CSRF
+        "X-CSRFToken": "{{ csrf_token }}", 
       },
       body: JSON.stringify({ access_token: accessToken }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.message === "Token inválido ou expirado") {
-          // Token inválido, removendo o token do localStorage e redirecionando para login
+          
           localStorage.removeItem("access_token");
           alert("Token inválido ou expirado. Redirecionando para login.");
-          window.location.href = "/login/"; // Redireciona para a tela de login
+          window.location.href = "/login/"; 
         } else {
           fetch("/api/get_perfil/", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "X-CSRFToken": "{{ csrf_token }}", // Incluindo o token CSRF
+              "X-CSRFToken": "{{ csrf_token }}", 
             },
             body: JSON.stringify({ access_token: accessToken }),
           })
             .then((response) => response.json())
             .then((data) => {
               if (data.message === "Token válido") {
-                // Armazenar o perfil do usuário no localStorage
+                
                 console.log("🚀 ~ .then ~ data.perfil:", data.perfil)
                 localStorage.setItem(
                   "user_profile",
@@ -105,25 +105,25 @@
   document.getElementById("logoutBtn").addEventListener("click", logout);
 
   function logout() {
-    const refreshToken = localStorage.getItem("refresh_token"); // Recupera o refresh token do localStorage
+    const refreshToken = localStorage.getItem("refresh_token"); 
 
     if (refreshToken) {
-      // Enviar requisição POST para o backend para realizar o logout
+      
       fetch("/api/logout/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`, // Envia o access token no cabeçalho
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`, 
         },
-        body: JSON.stringify({ refresh: refreshToken }), // Envia o refresh token no corpo da requisição
+        body: JSON.stringify({ refresh: refreshToken }), 
       })
         .then((response) => response.json())
         .then((data) => {
           if (data.message === "Logout realizado com sucesso!") {
-            // Remover o token JWT e refresh token do localStorage
+            
             localStorage.removeItem("access_token");
             localStorage.removeItem("refresh_token");
-            // Redirecionar para o login
+            
             window.location.href = "/login/";
           } else {
             alert("Erro ao realizar logout: " + data.detail);
@@ -139,37 +139,37 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    // Define um timeout para esperar o carregamento completo dos elementos
+    
     setTimeout(() => {
-      // Recupera o perfil do usuário armazenado no localStorage
+      
       const perfil = localStorage.getItem("user_profile");
   
-      // Verifica o perfil e oculta os links de acordo
+      
       console.log("🚀 ~ document.addEventListener ~ perfil:", perfil);
       console.log("🚀 ~ document.addEventListener ~ perfil:", perfil == "gestor");
   
       if (perfil && perfil == "gestor") {
-        // Seleciona os links para "Perfil" e "Departamento"
+        
         const perfilLink = document.querySelector('a[href="/perfil/"]')?.parentElement;
         const departamentoLink = document.querySelector('a[href="/departamento/"]')?.parentElement;
   
-        // Oculta os links
+        
         if (perfilLink) perfilLink.style.display = "none";
         if (departamentoLink) departamentoLink.style.display = "none";
       } else if (perfil && perfil == "funcionario") {
-        // Seleciona os links para "Perfil", "Departamento", "Funcionários" e "Criar Usuário"
+        
         const perfilLink = document.querySelector('a[href="/perfil/"]')?.parentElement;
         const departamentoLink = document.querySelector('a[href="/departamento/"]')?.parentElement;
         const funcionarioLink = document.querySelector('a[href="/funcionarios/"]')?.parentElement;
         const criarUsuarioLink = document.querySelector('a[href="/criar_usuario/"]')?.parentElement;
   
-        // Oculta os links
+        
         if (perfilLink) perfilLink.style.display = "none";
         if (departamentoLink) departamentoLink.style.display = "none";
         if (funcionarioLink) funcionarioLink.style.display = "none";
         if (criarUsuarioLink) criarUsuarioLink.style.display = "none";
       }
-    }, 500); // Ajuste o tempo (em ms) conforme necessário
+    }, 500); 
   });
   
   

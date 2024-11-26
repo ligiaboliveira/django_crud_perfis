@@ -4,18 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login</title>
-    <!-- Adicionando o link do Bootstrap -->
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 
   </head>
   <body class="bg-light">
-    <!-- Container principal -->
+    
     <div class="container d-flex justify-content-center align-items-center min-vh-100">
-      <!-- Cartão de login -->
+      
       <div class="card shadow-lg" style="width: 100%; max-width: 400px;">
         <div class="card-body">
           <h2 class="text-center mb-4">Login</h2>
-          <!-- Formulário de Login -->
+          
           <form id="loginForm">
             {% csrf_token %}
             <div class="mb-3">
@@ -46,7 +46,7 @@
       </div>
     </div>
 
-    <!-- Adicionando o script do Bootstrap -->
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
 
@@ -59,7 +59,7 @@
           const username = document.getElementById("username").value;
           const password = document.getElementById("password").value;
 
-          // Obtendo o token CSRF do formulário
+          
           const csrfToken = document.querySelector(
             "[name=csrfmiddlewaretoken]"
           ).value;
@@ -72,17 +72,17 @@
             }),
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",
-              "X-CSRFToken": csrfToken, // Incluindo o token CSRF no cabeçalho
+              "X-CSRFToken": csrfToken, 
             },
           })
             .then((response) => response.json())
             .then((data) => {
               console.log("🚀 ~ .then ~ data:", data);
               if (data.access_token) {
-                // Armazenando o token JWT no localStorage
+                
                 localStorage.setItem("access_token", data.access_token);
                 localStorage.setItem("refresh_token", data.refresh_token);
-                window.location.href = "/home/"; // Redireciona para a página de home
+                window.location.href = "/home/"; 
               } else {
                 alert("Erro: " + data.error);
               }

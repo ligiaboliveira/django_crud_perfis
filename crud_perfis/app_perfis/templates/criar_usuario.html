@@ -12,13 +12,13 @@
     />
   </head>
   <body>
-    <!-- Incluindo o Navbar -->
+    
     {% include 'navbar.html' %}
 
     <div class="container mt-5">
       <h1>Criar Novo Usuário</h1>
 
-      <!-- Formulário para criar o usuário -->
+      
       <form id="createUserForm">
         <div class="form-group mb-3">
           <label for="first_name">Nome</label>
@@ -94,17 +94,17 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      // Função para carregar perfis e departamentos
+      
 
-      // Chama a função para carregar perfis e departamentos ao carregar a página
+      
 
-      // Envia o formulário via fetch para criar o usuário
+      
       document
         .getElementById("createUserForm")
         .addEventListener("submit", function (event) {
           event.preventDefault();
 
-          // Obtendo os dados do formulário
+          
           const formData = {
             first_name: document.getElementById("first_name").value,
             last_name: document.getElementById("last_name").value,
@@ -114,12 +114,12 @@
             departamento: document.getElementById("departamento").value,
           };
 
-          // Enviando os dados via fetch para o backend
+          
           fetch("/criar_usuario/", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "X-CSRFToken": "{{ csrf_token }}", // Incluindo o token CSRF
+              "X-CSRFToken": "{{ csrf_token }}", 
             },
             body: JSON.stringify(formData),
           })
@@ -140,10 +140,10 @@
         });
 
       document.addEventListener("DOMContentLoaded", function () {
-        // Recupera o perfil do usuário armazenado no localStorage
+        
         const perfil = localStorage.getItem("user_profile");
 
-        // Verifica se o perfil é diferente de "super" e oculta os links de "Perfil" e "Departamento"
+        
         console.log("🚀 ~ document.addEventListener ~ perfil:", perfil);
         console.log(
           "🚀 ~ document.addEventListener ~ perfil:",
